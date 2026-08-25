@@ -1,0 +1,288 @@
+/* =========================================================
+   Premium palette
+   Navy Blue   : #0F1B33  (ink)
+   Wine        : #6E1F2A  (accent / hover)
+   Chocolate   : #3B2620  (secondary text)
+   Lavender    : #D9D2ED  (soft tint)
+   Baby Yellow : #F7ECAF  (rare accent line)
+   Paper       : #FBF9F5  (page background)
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
+
+.page {
+  display: flex;
+  flex-direction: column;
+  background-color: #FBF9F5;
+  color: #0F1B33;
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+}
+
+/* ---------- HERO ---------- */
+.hero {
+  background-color: #0F1B33;
+  padding: 7rem 3rem;
+  position: relative;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  left: 3rem;
+  right: 3rem;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(247, 236, 175, 0.4), transparent);
+}
+
+.heroInner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 0.85fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #F7ECAF;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.eyebrow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1.8rem;
+  height: 1px;
+  background-color: #F7ECAF;
+}
+
+.heroTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4.2rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #FBF9F5;
+  margin: 0 0 1.75rem;
+  letter-spacing: 0.01em;
+}
+
+.heroText {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #D9D2ED;
+  max-width: 440px;
+  margin: 0 0 2.75rem;
+  font-weight: 300;
+}
+
+.primaryLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: transparent;
+  color: #FBF9F5;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 1rem 0;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(251, 249, 245, 0.4);
+  transition: all 0.35s ease;
+}
+
+.primaryLink::after {
+  content: '→';
+  transition: transform 0.35s ease;
+}
+
+.primaryLink:hover {
+  color: #F7ECAF;
+  border-color: #F7ECAF;
+}
+
+.primaryLink:hover::after {
+  transform: translateX(6px);
+}
+
+.heroVisual {
+  height: 420px;
+  border: 1px solid rgba(217, 210, 237, 0.25);
+  background: linear-gradient(150deg, #3B2620 0%, #6E1F2A 55%, #0F1B33 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 2rem;
+}
+
+.heroVisual span {
+  color: #F7ECAF;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+/* ---------- FEATURED ---------- */
+.featured {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 6.5rem 3rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 3.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(15, 27, 51, 0.12);
+}
+
+.sectionHeader .eyebrow {
+  color: #6E1F2A;
+  padding-left: 2.5rem;
+}
+
+.sectionHeader .eyebrow::before {
+  background-color: #6E1F2A;
+}
+
+.sectionTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.6rem;
+  font-weight: 500;
+  color: #0F1B33;
+  margin: 0;
+}
+
+.sectionLink {
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #3B2620;
+  text-decoration: none;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.sectionLink:hover {
+  color: #6E1F2A;
+  border-color: #6E1F2A;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem 2rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 4rem;
+  color: #3B2620;
+  background-color: #D9D2ED;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+}
+
+/* ---------- BENEFITS ---------- */
+.benefits {
+  background-color: #D9D2ED;
+  padding: 6rem 3rem;
+}
+
+.benefitsInner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background-color: rgba(15, 27, 51, 0.15);
+}
+
+.benefitsInner > div {
+  background-color: #FBF9F5;
+  padding: 3rem 2.5rem;
+  transition: background-color 0.35s ease;
+}
+
+.benefitsInner > div:hover {
+  background-color: #FFFFFF;
+}
+
+.benefitTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #0F1B33;
+  margin: 0 0 0.85rem;
+}
+
+.benefitText {
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: #3B2620;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .benefitsInner {
+    grid-template-columns: 1fr;
+  }
+
+  .heroTitle {
+    font-size: 3.2rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .heroVisual {
+    height: 260px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero,
+  .featured,
+  .benefits {
+    padding: 3.5rem 1.5rem;
+  }
+
+  .heroTitle {
+    font-size: 2.4rem;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
