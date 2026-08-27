@@ -65,13 +65,15 @@ export default async function ProductPage({
       <aside className={styles.sizeChart}>
         <p className={styles.chartKicker}>Find your fit</p>
         <h2>Size chart.</h2>
+        <div className={styles.chartTable}>
         <table>
           <thead><tr><th>Size</th>{measurementFields.map((field) => <th key={field.key}>{field.label}</th>)}</tr></thead>
           <tbody>{(['S', 'M', 'L', 'XL', 'XXL'] as const).map((size) => {
             const measurement = product.sizeMeasurements.find((item) => item.size === size)
-            return <tr key={size}><td>{size}</td>{measurementFields.map((field) => { const value = measurement?.[field.key]; return <td key={field.key}>{value != null ? `${value} cm` : '—'}</td> })}</tr>
+            return <tr key={size}><td>{size}</td>{measurementFields.map((field) => { const value = measurement?.[field.key]; return <td key={field.key}>{value != null ? `${Number(value).toFixed(1)} cm` : '—'}</td> })}</tr>
           })}</tbody>
         </table>
+        </div>
         <p className={styles.chartNote}>Choose your size below the product image.</p>
       </aside>
     </main>
