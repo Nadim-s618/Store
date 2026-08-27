@@ -8,6 +8,19 @@ function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
+async function uniqueProductSlug(name: string) {
+  const baseSlug = slugify(name) || 'product'
+  let slug = baseSlug
+  let suffix = 2
+
+  while (await prisma.product.findUnique({ where: { slug }, select: { id: true } })) {
+    slug = `${baseSlug}-${suffix}`
+    suffix += 1
+  }
+
+  return slug
+}
+
 export async function POST(request: Request) {
   try {
     await requireAdmin()
@@ -44,7 +57,7 @@ export async function POST(request: Request) {
   const topCollectionOrder = Number(getText('topCollectionOrder') || 0)
   const isNewArrival = getText('isNewArrival') === 'true'
   const newArrivalOrder = Number(getText('newArrivalOrder') || 0)
-  const slug = slugify(name)
+  const slug = await uniqueProductSlug(name)
   const colors = [...new Set(validVariants.map((variant) => variant.color))]
   const filesByColor = new Map(colors.map((color) => [color, viewOptions.flatMap((view) => { const file = formData.get(`image-${color}-${view}`); return file instanceof File ? [{ file, view }] : [] })]))
 
@@ -92,7 +105,7 @@ export async function POST(request: Request) {
     if (createdProductId) await prisma.product.delete({ where: { id: createdProductId } }).catch(() => undefined)
     const isDuplicate = error instanceof Error && error.message.includes('Unique constraint')
     const detail = process.env.NODE_ENV !== 'production' && error instanceof Error ? ` ${error.message}` : ''
-    return Response.json({ error: isDuplicate ? 'A product with this name already exists.' : `Product could not be created.${detail}` }, { status: 400 })
+    return Response.json({ error: isDuplicate ? 'A product with this URL already exists. Please try again.' : `Product could not be created.${detail}` }, { status: 400 })
   }
 }
 
