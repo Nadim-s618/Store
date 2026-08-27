@@ -57,6 +57,8 @@ export default async function ProductPage({
           productPrice={Number(product.price)}
           variants={product.sizeStocks.map((variant) => ({ color: variant.color, size: variant.size, quantity: variant.quantity }))}
           images={product.images.map((image) => ({ color: image.color, view: image.view, url: image.url }))}
+          measurementFields={measurementFields}
+          measurements={product.sizeMeasurements.map((measurement) => ({ size: measurement.size, height: measurement.height == null ? null : Number(measurement.height), width: measurement.width == null ? null : Number(measurement.width), waist: measurement.waist == null ? null : Number(measurement.waist), hip: measurement.hip == null ? null : Number(measurement.hip) }))}
           fallbackImage={product.imageUrl ?? undefined}
           reviews={product.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment, author: review.user.name || 'Customer', verifiedPurchase: review.verifiedPurchase, createdAt: review.createdAt.toISOString() }))}
           relatedProducts={relatedProducts.map((related) => ({ id: related.id, slug: related.slug, name: related.name, price: Number(related.price), imageUrl: related.imageUrl, stock: related.stock, sizeStocks: related.sizeStocks }))}
