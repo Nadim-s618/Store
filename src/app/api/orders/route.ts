@@ -122,7 +122,27 @@ export async function PATCH(request: Request) {
       const order = await transaction.order.findUnique({ where: { id: body.orderId }, include: { items: true } })
       if (!order) throw new Error('ORDER_NOT_FOUND')
 
-      if (nextStatus !== OrderStatus.PENDING && !order.inventoryDecremented) {
+      if (nextStatus === OrderStatus.CANCELLED) {
+        if (order.inventoryDecremented) {
+          for (const item of order.items) {
+            const product = await transaction.product.findUnique({ where: { id: item.productId }, select: { stock: true, sizeStocks: { where: { color: item.color, size: item.size }, select: { id: true, quantity: true } } } })
+            if (!product) throw new Error('PRODUCT_NOT_FOUND')
+
+            if (product.sizeStocks.length > 0) {
+              await transaction.productSizeStock.update({ where: { id: product.sizeStocks[0].id }, data: { quantity: { increment: item.quantity } } })
+              await transaction.product.update({ where: { id: item.productId }, data: { stock: { increment: item.quantity } } })
+              await transaction.inventoryAdjustment.create({ data: { productId: item.productId, color: item.color, size: item.size, quantityChange: item.quantity, quantityAfter: product.sizeStocks[0].quantity + item.quantity, reason: 'Order cancelled — stock restored', actorEmail: admin?.email ?? null } })
+            } else {
+              await transaction.product.update({ where: { id: item.productId }, data: { stock: { increment: item.quantity } } })
+              await transaction.inventoryAdjustment.create({ data: { productId: item.productId, color: item.color, size: item.size, quantityChange: item.quantity, quantityAfter: product.stock + item.quantity, reason: 'Order cancelled — stock restored', actorEmail: admin?.email ?? null } })
+            }
+          }
+          const restored = await transaction.order.updateMany({ where: { id: order.id, inventoryDecremented: true }, data: { status: nextStatus, inventoryDecremented: false } })
+          if (restored.count !== 1) throw new Error('ORDER_STATE_CHANGED')
+        } else {
+          await transaction.order.update({ where: { id: order.id }, data: { status: nextStatus } })
+        }
+      } else if (nextStatus !== OrderStatus.PENDING && !order.inventoryDecremented) {
         for (const item of order.items) {
           const product = await transaction.product.findUnique({ where: { id: item.productId }, select: { stock: true, sizeStocks: { where: { color: item.color, size: item.size }, select: { id: true, quantity: true } } } })
           if (!product) throw new Error('PRODUCT_NOT_FOUND')
@@ -140,7 +160,8 @@ export async function PATCH(request: Request) {
             await transaction.inventoryAdjustment.create({ data: { productId: item.productId, color: item.color, size: item.size, quantityChange: -item.quantity, quantityAfter: after, reason: 'Order fulfilled', actorEmail: admin?.email ?? null } })
           }
         }
-        await transaction.order.update({ where: { id: order.id }, data: { status: nextStatus, inventoryDecremented: true } })
+        const allocated = await transaction.order.updateMany({ where: { id: order.id, inventoryDecremented: false }, data: { status: nextStatus, inventoryDecremented: true } })
+        if (allocated.count !== 1) throw new Error('ORDER_STATE_CHANGED')
       } else {
         await transaction.order.update({ where: { id: order.id }, data: { status: nextStatus } })
       }
@@ -150,6 +171,7 @@ export async function PATCH(request: Request) {
     console.error('Unable to update order status', error)
     if (error instanceof Error && error.message === 'ORDER_NOT_FOUND') return Response.json({ error: 'Order not found.' }, { status: 404 })
     if (error instanceof Error && error.message === 'INSUFFICIENT_STOCK') return Response.json({ error: 'There is not enough stock to move this order out of pending.' }, { status: 409 })
+    if (error instanceof Error && error.message === 'ORDER_STATE_CHANGED') return Response.json({ error: 'This order was updated by another request. Refresh and try again.' }, { status: 409 })
     return Response.json({ error: 'Unable to update order status.' }, { status: 500 })
   }
 }

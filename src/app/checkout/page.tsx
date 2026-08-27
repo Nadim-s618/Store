@@ -14,6 +14,7 @@ export default function CheckoutPage() {
   const [submitted, setSubmitted] = useState(false)
   const [deliveryDetails, setDeliveryDetails] = useState<DeliveryDetails>({ name: '', email: '', phone: '', address: '', city: '', postcode: '', country: '' })
   const [orderNumber, setOrderNumber] = useState('')
+  const [orderId, setOrderId] = useState('')
   const [trackingCode, setTrackingCode] = useState('')
   const [isDownloading, setIsDownloading] = useState(false)
   const [isPlacing, setIsPlacing] = useState(false)
@@ -38,10 +39,11 @@ export default function CheckoutPage() {
     const details = { name: String(formData.get('name') || ''), email: String(formData.get('email') || ''), phone: String(formData.get('phone') || ''), address: String(formData.get('address') || ''), city: String(formData.get('city') || ''), postcode: String(formData.get('postcode') || ''), country: String(formData.get('country') || '') }
     try {
       const response = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ deliveryDetails: details, items, total, paymentMethod }) })
-      const result = await response.json() as { orderNumber?: string; trackingCode?: string; error?: string }
+      const result = await response.json() as { orderId?: string; orderNumber?: string; trackingCode?: string; error?: string }
       if (!response.ok || !result.orderNumber) throw new Error(result.error || 'Unable to place the order right now.')
       setDeliveryDetails(details)
       setOrderNumber(result.orderNumber)
+      setOrderId(result.orderId || '')
       setTrackingCode(result.trackingCode || '')
       window.localStorage.removeItem(storageKey)
       window.dispatchEvent(new CustomEvent('cart-updated'))
@@ -59,7 +61,7 @@ export default function CheckoutPage() {
       const response = await fetch('/api/receipt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderNumber, trackingCode, deliveryDetails, items, subtotal, shipping, total }),
+        body: JSON.stringify({ orderId, trackingCode }),
       })
       if (!response.ok) throw new Error('Invoice download failed')
       const invoiceBlob = await response.blob()
