@@ -1,6 +1,96 @@
-.link { display: block; color: inherit; text-decoration: none; }
-.imageBox { aspect-ratio: 1; overflow: hidden; margin-bottom: .5rem; border-radius: .5rem; background: #f3f4f6; }
-.image { width: 100%; height: 100%; object-fit: cover; transition: transform .2s; }
-.link:hover .image { transform: scale(1.05); }
-.name { margin: 0; font-size: .875rem; font-weight: 600; }
-.price { margin: .25rem 0 0; color: #4b5563; font-size: .875rem; }
+.link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.imageBox {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #ece7dc;
+  margin-bottom: 1.1rem;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .6s cubic-bezier(.16, 1, .3, 1);
+}
+
+.link:hover .image {
+  transform: scale(1.045);
+}
+
+/* placeholder look when there's no image */
+.imageBox:empty::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgba(22,37,29,.06) 25%, transparent 25%) -10px 0,
+    linear-gradient(225deg, rgba(22,37,29,.06) 25%, transparent 25%) -10px 0,
+    linear-gradient(315deg, rgba(22,37,29,.06) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(22,37,29,.06) 25%, transparent 25%);
+  background-size: 20px 20px;
+}
+
+/* thin corner-mark that draws in on hover, echoes the site's understated feel */
+.imageBox::after {
+  content: '';
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  width: .55rem;
+  height: .55rem;
+  border-top: 1px solid rgba(255, 255, 255, .85);
+  border-right: 1px solid rgba(255, 255, 255, .85);
+  opacity: 0;
+  transform: translate(-4px, 4px);
+  transition: opacity .35s ease, transform .35s ease;
+}
+.link:hover .imageBox::after {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.name {
+  margin: 0 0 .35rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: .92rem;
+  letter-spacing: -.01em;
+  color: #16251d;
+  transition: color .25s ease;
+}
+.link:hover .name {
+  color: #a36c42;
+}
+
+.price {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  color: rgba(22, 37, 29, .55);
+  letter-spacing: .01em;
+}
+
+.details { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+
+.availability {
+  margin: .1rem 0 0;
+  color: #a16f43;
+  font-size: .7rem;
+  letter-spacing: .04em;
+  text-align: right;
+}
+
+.outOfStock { color: #a54d3e; }
+
+@media (prefers-reduced-motion: reduce) {
+  .image, .imageBox::after, .name {
+    transition: none;
+  }
+}

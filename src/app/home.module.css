@@ -1,288 +1,285 @@
-/* =========================================================
-   Premium palette
-   Navy Blue   : #0F1B33  (ink)
-   Wine        : #6E1F2A  (accent / hover)
-   Chocolate   : #3B2620  (secondary text)
-   Lavender    : #D9D2ED  (soft tint)
-   Baby Yellow : #F7ECAF  (rare accent line)
-   Paper       : #FBF9F5  (page background)
-   ========================================================= */
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500;600&display=swap');
 
 .page {
+  --ink: #16251d;
+  --accent: #a36c42;
+  --cream: #f5ead8;
+  --lavender: #ece4f5;
+  --lavender-ink: #4a3b63;
+  --light-blue: #e8f0f6;
+  position: relative;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+}
+.page *, .page *::before, .page *::after { box-sizing: border-box; }
+
+/* ---------- Sticky stacking sections ---------- */
+.stackSection {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  min-height: 100dvh; /* falls back gracefully in older browsers */
   display: flex;
-  flex-direction: column;
-  background-color: #FBF9F5;
-  color: #0F1B33;
-  font-family: 'Inter', sans-serif;
-  font-weight: 300;
-}
-
-/* ---------- HERO ---------- */
-.hero {
-  background-color: #0F1B33;
-  padding: 7rem 3rem;
-  position: relative;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  left: 3rem;
-  right: 3rem;
-  bottom: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(247, 236, 175, 0.4), transparent);
-}
-
-.heroInner {
-  max-width: 1240px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 0.85fr;
-  gap: 5rem;
   align-items: center;
+  overflow: hidden;
+  transform-origin: top center;
+  will-change: transform, opacity;
 }
 
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.28em;
-  font-size: 0.72rem;
-  font-weight: 500;
-  color: #F7ECAF;
-  margin-bottom: 1.5rem;
-  position: relative;
-  padding-left: 2.5rem;
-}
+.sectionInner { width: 100%; transform: translateY(var(--content-lift, 0px)); }
 
-.eyebrow::before {
-  content: '';
+/* ---------- 01 / Hero ---------- */
+.hero {
+  position: relative; /* was relying on .stackSection's sticky — now scrolls normally */
+  z-index: 1;
+  align-items: flex-end;
+  padding: clamp(3rem, 8dvh, 6rem) clamp(1.5rem, 8vw, 8rem);
+  background: url('/feature.webp') center / cover no-repeat;
+  color: #fff;
+}
+.heroOverlay {
   position: absolute;
-  left: 0;
-  top: 50%;
-  width: 1.8rem;
-  height: 1px;
-  background-color: #F7ECAF;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(6, 8, 24, .78), rgba(6, 8, 24, .18) 70%),
+    linear-gradient(0deg, rgba(6, 8, 24, .66), transparent 55%);
 }
-
+.heroContent { position: relative; max-width: 620px; z-index: 1; }
 .heroTitle {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 4.2rem;
+  max-width: 600px;
+  margin: 0 0 1.25rem;
+  font-family: 'Playfair Display', serif;
   font-weight: 500;
-  line-height: 1.1;
-  color: #FBF9F5;
-  margin: 0 0 1.75rem;
-  letter-spacing: 0.01em;
+  font-size: clamp(2.4rem, 4vw + 3dvh, 6.7rem);
+  line-height: .98;
+  letter-spacing: -.04em;
 }
 
 .heroText {
-  font-size: 1.05rem;
-  line-height: 1.85;
-  color: #D9D2ED;
-  max-width: 440px;
-  margin: 0 0 2.75rem;
-  font-weight: 300;
+  max-width: 410px;
+  margin: 0 0 1.75rem;
+  color: rgba(255, 255, 255, .78);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.heroNote {
+  position: absolute;
+  right: clamp(1.5rem, 4vw, 4rem);
+  bottom: 3rem;
+  z-index: 1;
+  color: rgba(255, 255, 255, .62);
+  font-size: .68rem;
+  line-height: 1.7;
+  letter-spacing: .15em;
+  text-align: right;
+  text-transform: uppercase;
 }
 
-.primaryLink {
+/* ---------- Shared kickers / titles ---------- */
+.kicker, .kickerDark {
+  margin: 0 0 1.5rem;
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.kicker { color: #e3c48e; }
+.kickerDark { color: var(--accent); }
+.sectionTitle, .accountTitle {
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  margin: 0;
+}
+.sectionTitle { font-size: clamp(2.2rem, 4vw, 3.5rem); letter-spacing: -.035em; }
+
+/* ---------- Buttons (pill style, background-aware) ---------- */
+.pillButton {
+  display: inline-flex;
+  gap: 1rem;
+  align-items: center;
+  padding: .9rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background .25s ease, color .25s ease, transform .25s ease, box-shadow .25s ease;
+}
+.pillButton:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 26px -14px rgba(0, 0, 0, .3);
+}
+.pillButtonOnDark {
+  color: #fff;
+  border-color: rgba(255, 255, 255, .55);
+}
+.pillButtonOnDark:hover {
+  background: #fff;
+  color: var(--ink);
+  border-color: #fff;
+}
+.pillButtonOnLight {
+  color: var(--ink);
+  background: rgba(22, 37, 29, .08);
+  border-color: rgba(22, 37, 29, .45);
+}
+.pillButtonOnLight:hover {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+.buttonArrow, .linkArrow {
+  display: inline-block;
+  font-size: 1.1rem;
+  line-height: .5;
+  transition: transform .25s ease;
+}
+.pillButton:hover .buttonArrow,
+.textLink:hover .linkArrow { transform: translate(3px, -3px); }
+
+.textLink {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  background-color: transparent;
-  color: #FBF9F5;
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  gap: .5rem;
+  color: var(--ink);
+  padding-bottom: .25rem;
+  border-bottom: 1px solid var(--accent);
+  font-size: .72rem;
+  letter-spacing: .12em;
   text-transform: uppercase;
-  padding: 1rem 0;
   text-decoration: none;
-  border-bottom: 1px solid rgba(251, 249, 245, 0.4);
-  transition: all 0.35s ease;
+  transition: color .25s ease, gap .25s ease;
+}
+.textLink:hover { color: var(--accent); gap: .8rem; }
+
+/* ---------- 02 / Top collection — white ---------- */
+.collectionSection {
+  z-index: 2;
+  --content-lift: -4vh;
+  background: #ffffff;
+  padding: 6rem clamp(1.5rem, 5vw, 4rem);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 -50px 70px -30px rgba(22, 37, 29, .18);
 }
 
-.primaryLink::after {
-  content: '→';
-  transition: transform 0.35s ease;
+/* ---------- 03 / New arrivals — lavender ---------- */
+.arrivalsSection {
+  z-index: 3;
+  --content-lift: -4vh;
+  background-color: var(--lavender);
+  padding: 6rem clamp(1.5rem, 5vw, 4rem);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 -50px 70px -30px rgba(22, 37, 29, .18);
+  color: var(--lavender-ink);
 }
-
-.primaryLink:hover {
-  color: #F7ECAF;
-  border-color: #F7ECAF;
-}
-
-.primaryLink:hover::after {
-  transform: translateX(6px);
-}
-
-.heroVisual {
-  height: 420px;
-  border: 1px solid rgba(217, 210, 237, 0.25);
-  background: linear-gradient(150deg, #3B2620 0%, #6E1F2A 55%, #0F1B33 100%);
-  display: flex;
-  align-items: flex-end;
-  padding: 2rem;
-}
-
-.heroVisual span {
-  color: #F7ECAF;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-}
-
-/* ---------- FEATURED ---------- */
-.featured {
-  max-width: 1240px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 6.5rem 3rem;
-}
+.arrivalsSection .kickerDark { color: #8a6bb0; }
+.arrivalsSection .sectionTitle { color: var(--lavender-ink); }
+.arrivalsSection .sectionHeader { border-bottom-color: rgba(74, 59, 99, .18); }
+.arrivalsSection .textLink { color: var(--lavender-ink); border-bottom-color: #8a6bb0; }
+.arrivalsSection .textLink:hover { color: #8a6bb0; }
 
 .sectionHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 3.5rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid rgba(15, 27, 51, 0.12);
-}
-
-.sectionHeader .eyebrow {
-  color: #6E1F2A;
-  padding-left: 2.5rem;
-}
-
-.sectionHeader .eyebrow::before {
-  background-color: #6E1F2A;
-}
-
-.sectionTitle {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 2.6rem;
-  font-weight: 500;
-  color: #0F1B33;
-  margin: 0;
-}
-
-.sectionLink {
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #3B2620;
-  text-decoration: none;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.3s ease, color 0.3s ease;
-}
-
-.sectionLink:hover {
-  color: #6E1F2A;
-  border-color: #6E1F2A;
+  align-items: end;
+  gap: 2rem;
+  max-width: 1280px;
+  margin: 0 auto 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(22, 37, 29, .16);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 2.5rem 2rem;
+  gap: 2rem 1.25rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.gridItem { transition: transform .35s ease, filter .35s ease; }
+.gridItem:hover {
+  transform: translateY(-8px);
+  filter: drop-shadow(0 16px 20px rgba(22, 37, 29, .18));
 }
 
 .empty {
-  text-align: center;
-  padding: 4rem;
-  color: #3B2620;
-  background-color: #D9D2ED;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.3rem;
-}
-
-/* ---------- BENEFITS ---------- */
-.benefits {
-  background-color: #D9D2ED;
-  padding: 6rem 3rem;
-}
-
-.benefitsInner {
-  max-width: 1240px;
+  max-width: 1280px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background-color: rgba(15, 27, 51, 0.15);
+  padding: 4rem 1rem;
+  background: rgba(22, 37, 29, .05);
+  color: #6c665e;
+  text-align: center;
 }
 
-.benefitsInner > div {
-  background-color: #FBF9F5;
-  padding: 3rem 2.5rem;
-  transition: background-color 0.35s ease;
+/* ---------- 04 / Account — lightest blue (adjusted) ---------- */
+.accountSection {
+  z-index: 4;
+  --content-lift: -4vh;
+  background: var(--light-blue);
+  padding: 6rem clamp(1.5rem, 8vw, 8rem);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 -50px 70px -30px rgba(22, 37, 29, .18);
+  color: var(--ink);
 }
-
-.benefitsInner > div:hover {
-  background-color: #FFFFFF;
+.accountRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 2rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
 }
+.accountTitle { font-size: clamp(2.5rem, 5vw, 5rem); line-height: 1; letter-spacing: -.04em; margin-bottom: 1rem; }
+.accountText { max-width: 420px; margin: 0; color: rgba(22, 37, 29, .65); line-height: 1.7; }
+.accountActions { display: flex; flex-wrap: wrap; gap: .75rem; flex-shrink: 0; }
 
-.benefitTitle {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.6rem;
-  font-weight: 500;
-  color: #0F1B33;
-  margin: 0 0 0.85rem;
-}
-
-.benefitText {
-  font-size: 0.92rem;
-  line-height: 1.75;
-  color: #3B2620;
-  margin: 0;
-  font-weight: 300;
-}
-
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 1024px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
+/* ---------- Scroll-in reveal (progressive enhancement) ---------- */
+@supports (animation-timeline: view()) {
+  .sectionInner, .heroContent {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 35%;
   }
-
-  .benefitsInner {
-    grid-template-columns: 1fr;
-  }
-
-  .heroTitle {
-    font-size: 3.2rem;
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(calc(48px + var(--content-lift, 0px))); }
+    to { opacity: 1; transform: translateY(var(--content-lift, 0px)); }
   }
 }
 
-@media (max-width: 860px) {
-  .heroInner {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .heroVisual {
-    height: 260px;
-  }
+@media (prefers-reduced-motion: reduce) {
+  .pillButton, .textLink, .gridItem, .buttonArrow, .linkArrow { transition: none; }
+  .sectionInner, .heroContent { animation: none; }
+  .stackSection { transform: none !important; opacity: 1 !important; }
 }
 
-@media (max-width: 640px) {
-  .hero,
-  .featured,
-  .benefits {
-    padding: 3.5rem 1.5rem;
+/* ---------- Responsive ---------- */
+@media (max-width: 800px) {
+  .stackSection { min-height: 100svh; }
+  .collectionSection, .arrivalsSection { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .accountRow { align-items: start; flex-direction: column; }
+  .accountActions { width: 100%; }
+}
+@media (max-width: 1100px) and (min-width: 801px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) {
+  .stackSection { min-height: 100svh; overflow: visible; }
+  .hero { padding-bottom: 4rem; }
+  .heroNote { display: none; }
+  .heroContent { width: 100%; }
+  .heroText { font-size: .92rem; }
+  .collectionSection, .arrivalsSection, .accountSection {
+    min-height: max(100svh, 42rem);
+    padding: 4.5rem 1rem;
+    border-radius: 24px 24px 0 0;
   }
-
-  .heroTitle {
-    font-size: 2.4rem;
-  }
-
-  .sectionHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.25rem;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
+  .sectionHeader { align-items: start; flex-direction: column; margin-bottom: 2rem; }
+  .grid { grid-template-columns: 1fr; gap: 2rem 0; }
+  .gridItem { max-width: 34rem; width: 100%; margin: 0 auto; }
+  .accountActions { flex-direction: column; align-items: stretch; }
+  .accountActions .pillButton { justify-content: center; }
 }

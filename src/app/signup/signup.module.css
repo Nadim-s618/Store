@@ -1,0 +1,249 @@
+.page {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  place-items: center;
+  padding: 4rem 1.5rem;
+  font-family: 'DM Sans', sans-serif;
+  color: #16251d;
+  position: relative;
+
+  background-image:
+    linear-gradient(180deg, rgba(10, 10, 12, 0.28) 0%, rgba(10, 10, 12, 0.12) 45%, rgba(10, 10, 12, 0.35) 100%),
+    url('/signup.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.card {
+  width: min(100%, 980px);
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  overflow: hidden;
+  border-radius: 28px;
+
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(2rem, 6vw, 5rem);
+  background: rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.kicker {
+  margin: 0 0 1.25rem;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.intro h1 {
+  max-width: 280px;
+  margin: 0 0 1.25rem;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.6rem, 5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.intro p:last-child {
+  max-width: 280px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+}
+
+.formArea {
+  padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.socials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.socials button {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.socials button:hover {
+  border-color: #d9a066;
+  color: #d9a066;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.form {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.form input:not([type='checkbox']) {
+  width: 100%;
+  padding: 0.9rem 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  outline: 0;
+  color: #ffffff;
+  background: transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  text-transform: none;
+}
+
+.form input:not([type='checkbox'])::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form input:not([type='checkbox']):focus {
+  border-color: #d9a066;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: 0.6rem !important;
+  margin-top: 0.35rem;
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 0.68rem !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.checkbox input {
+  accent-color: #ffffff;
+}
+
+.message {
+  margin: 0;
+  color: #ffb4a3;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.submit {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #ffffff;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #16251d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.submit:hover:not(:disabled) {
+  background: #d9a066;
+  border-color: #d9a066;
+  color: #16251d;
+}
+
+.submit:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.loginPrompt {
+  margin: 1.75rem 0 0;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.loginPrompt a {
+  color: #d9a066;
+  text-underline-offset: 0.25rem;
+}
+
+@media (max-width: 700px) {
+  .card {
+    grid-template-columns: 1fr;
+  }
+
+  .intro {
+    padding: 2.5rem 2rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 2rem 1rem;
+  }
+
+  .socials,
+  .fieldRow {
+    grid-template-columns: 1fr;
+  }
+
+  .formArea {
+    padding: 2rem 1.5rem;
+  }
+}

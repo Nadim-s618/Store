@@ -1,0 +1,129 @@
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requireAdmin } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+
+export const runtime = 'nodejs'
+
+function slugify(value: string) {
+  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+export async function POST(request: Request) {
+  try {
+    await requireAdmin()
+  } catch {
+    return Response.json({ error: 'Admin access is required.' }, { status: 403 })
+  }
+
+  const formData = await request.formData()
+  const getText = (key: string) => {
+    const value = formData.get(key)
+    return typeof value === 'string' ? value : ''
+  }
+  const name = getText('name').trim()
+  const category = getText('category').trim()
+  const description = getText('description').trim()
+  const price = Number(getText('price'))
+  let variants: Array<{ color?: string; size?: string; quantity?: number }>
+  try {
+    variants = JSON.parse(getText('variants') || '[]') as Array<{ color?: string; size?: string; quantity?: number }>
+  } catch {
+    return Response.json({ error: 'Product variant data is invalid. Please try again.' }, { status: 400 })
+  }
+  let measurements: Array<{ size?: string; height?: number; width?: number; waist?: number; hip?: number }>
+  try { measurements = JSON.parse(getText('measurements') || '[]') as Array<{ size?: string; height?: number; width?: number; waist?: number; hip?: number }> } catch {
+    return Response.json({ error: 'Product measurement data is invalid. Please try again.' }, { status: 400 })
+  }
+  const sizes = ['S', 'M', 'L', 'XL', 'XXL'] as const
+  const colorOptions = ['Black', 'White', 'Navy', 'Beige', 'Grey', 'Green', 'Brown', 'Red']
+  const viewOptions = ['Front', 'Back', 'Right', 'Left'] as const
+  const validVariants = variants.map((variant) => ({ color: String(variant.color ?? ''), size: String(variant.size ?? ''), quantity: Number(variant.quantity) }))
+  const validMeasurements = measurements.map((measurement) => ({ size: String(measurement.size ?? ''), height: Number(measurement.height), width: Number(measurement.width), waist: Number(measurement.waist), hip: Number(measurement.hip) })).filter((measurement) => measurement.size || Number.isFinite(measurement.height) || Number.isFinite(measurement.width) || Number.isFinite(measurement.waist) || Number.isFinite(measurement.hip))
+  const stock = validVariants.reduce((total, variant) => total + variant.quantity, 0)
+  const isTopCollection = getText('isTopCollection') === 'true'
+  const topCollectionOrder = Number(getText('topCollectionOrder') || 0)
+  const isNewArrival = getText('isNewArrival') === 'true'
+  const newArrivalOrder = Number(getText('newArrivalOrder') || 0)
+  const slug = slugify(name)
+  const colors = [...new Set(validVariants.map((variant) => variant.color))]
+  const filesByColor = new Map(colors.map((color) => [color, viewOptions.flatMap((view) => { const file = formData.get(`image-${color}-${view}`); return file instanceof File ? [{ file, view }] : [] })]))
+
+  if (!name || !category || !slug) return Response.json({ error: 'Product name and category are required.' }, { status: 400 })
+  if (!Number.isFinite(price) || price < 0) return Response.json({ error: 'Enter a valid product price.' }, { status: 400 })
+  if (!validVariants.length || validVariants.some((variant) => !colorOptions.includes(variant.color) || !sizes.includes(variant.size as typeof sizes[number]) || !Number.isInteger(variant.quantity) || variant.quantity < 0)) return Response.json({ error: 'Add valid stock quantities for at least one color and size.' }, { status: 400 })
+  if (validMeasurements.some((measurement) => !sizes.includes(measurement.size as typeof sizes[number]) || [measurement.height, measurement.width, measurement.waist, measurement.hip].some((value) => Number.isFinite(value) && value < 0))) return Response.json({ error: 'Enter valid non-negative measurements.' }, { status: 400 })
+  if (colors.some((color) => (filesByColor.get(color) ?? []).length === 0)) return Response.json({ error: 'Add at least one image for every selected color.' }, { status: 400 })
+  if ([...filesByColor.values()].some((files) => files.some(({ file }) => !file.type.startsWith('image/') || file.size > 5 * 1024 * 1024))) return Response.json({ error: 'Every image must be under 5 MB and use an image format.' }, { status: 400 })
+  if (!Number.isInteger(topCollectionOrder) || topCollectionOrder < 0 || !Number.isInteger(newArrivalOrder) || newArrivalOrder < 0) return Response.json({ error: 'Homepage order must be a whole number of 0 or higher.' }, { status: 400 })
+
+  const admin = createAdminClient()
+  const { error: bucketError } = await admin.storage.createBucket('product-images', { public: true })
+  if (bucketError && !bucketError.message.toLowerCase().includes('already exists')) return Response.json({ error: `Image storage could not be prepared: ${bucketError.message}` }, { status: 500 })
+
+  let createdProductId = ''
+  try {
+    const product = await prisma.product.create({
+      data: {
+        name, slug, description: description || null, price, stock, imageUrl: null,
+        isTopCollection, topCollectionOrder, isNewArrival, newArrivalOrder,
+        sizeStocks: { create: validVariants.map((variant) => ({ color: variant.color, size: variant.size as typeof sizes[number], quantity: variant.quantity })) },
+        sizeMeasurements: { create: validMeasurements.map((measurement) => ({ size: measurement.size as typeof sizes[number], height: Number.isFinite(measurement.height) ? measurement.height : null, width: Number.isFinite(measurement.width) ? measurement.width : null, waist: Number.isFinite(measurement.waist) ? measurement.waist : null, hip: Number.isFinite(measurement.hip) ? measurement.hip : null })) },
+        category: { connectOrCreate: { where: { slug: slugify(category) }, create: { name: category, slug: slugify(category) } } },
+      },
+    })
+    createdProductId = product.id
+    const uploadedImages: { color: string; view: string; url: string; sortOrder: number }[] = []
+    for (const color of colors) {
+      const files = filesByColor.get(color) ?? []
+      for (let index = 0; index < files.length; index += 1) {
+        const { file, view } = files[index]
+        const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const path = `${product.id}/${slugify(color)}-${view.toLowerCase()}-${Date.now()}.${extension}`
+        const { error: uploadError } = await admin.storage.from('product-images').upload(path, file, { cacheControl: '3600', contentType: file.type, upsert: false })
+        if (uploadError) throw new Error(uploadError.message)
+        const { data } = admin.storage.from('product-images').getPublicUrl(path)
+        uploadedImages.push({ color, view, url: data.publicUrl, sortOrder: index })
+      }
+    }
+    await prisma.productImage.createMany({ data: uploadedImages.map((image) => ({ productId: product.id, ...image })) })
+    await prisma.product.update({ where: { id: product.id }, data: { imageUrl: uploadedImages[0]?.url ?? null } })
+    return Response.json({ id: product.id }, { status: 201 })
+  } catch (error) {
+    if (createdProductId) await prisma.product.delete({ where: { id: createdProductId } }).catch(() => undefined)
+    const isDuplicate = error instanceof Error && error.message.includes('Unique constraint')
+    const detail = process.env.NODE_ENV !== 'production' && error instanceof Error ? ` ${error.message}` : ''
+    return Response.json({ error: isDuplicate ? 'A product with this name already exists.' : `Product could not be created.${detail}` }, { status: 400 })
+  }
+}
+
+export async function PATCH(request: Request) {
+  try { await requireAdmin() } catch { return Response.json({ error: 'Admin access is required.' }, { status: 403 }) }
+  const body = await request.json().catch(() => null) as Record<string, unknown> | null
+  const productId = typeof body?.id === 'string' ? body.id : ''
+  const name = typeof body?.name === 'string' ? body.name.trim() : ''
+  const categoryName = typeof body?.categoryName === 'string' ? body.categoryName.trim() : ''
+  const price = Number(body?.price)
+  const stock = Number(body?.stock)
+  if (!productId || !name || !categoryName) return Response.json({ error: 'Name and category are required.' }, { status: 400 })
+  if (!Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) return Response.json({ error: 'Enter valid price and stock values.' }, { status: 400 })
+  try {
+    const updated = await prisma.product.update({ where: { id: productId }, data: { name, description: typeof body?.description === 'string' ? body.description.trim() || null : null, price, stock, category: { connectOrCreate: { where: { slug: slugify(categoryName) }, create: { name: categoryName, slug: slugify(categoryName) } } } } })
+    return Response.json({ id: updated.id })
+  } catch (error) {
+    const isDuplicate = error instanceof Error && error.message.includes('Unique constraint')
+    return Response.json({ error: isDuplicate ? 'A product with this name already exists.' : 'Product could not be updated.' }, { status: 400 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try { await requireAdmin() } catch { return Response.json({ error: 'Admin access is required.' }, { status: 403 }) }
+  const body = await request.json().catch(() => null) as { productId?: unknown } | null
+  const productId = typeof body?.productId === 'string' ? body.productId : ''
+  if (!productId) return Response.json({ error: 'Product ID is required.' }, { status: 400 })
+  try {
+    await prisma.product.delete({ where: { id: productId } })
+    return Response.json({ deleted: true })
+  } catch {
+    return Response.json({ error: 'This product cannot be deleted because it is referenced by an order, cart, or review.' }, { status: 409 })
+  }
+}

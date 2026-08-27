@@ -1,0 +1,33 @@
+.logo {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .02em;
+  font-family: 'Playfair Display', serif;
+  font-weight: 500;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  letter-spacing: .01em;
+  line-height: 1;
+  user-select: none;
+}
+
+.ring {
+  display: inline-block;
+  width: .60em;
+  height: .60em;
+  margin-left: .06em;
+  border-radius: 50%;
+  border: .09em solid currentColor;
+  box-sizing: border-box;
+  transform: translateY(-.08em);
+  transition: transform .45s cubic-bezier(.16, 1, .3, 1);
+}
+
+.logo:hover .ring { transform: translateY(-.08em) rotate(180deg) scale(1.08); }
+.onDark { color: #f7f3ea; }
+.onDark .ring { border-color: #e3c48e; }
+.onLight { color: #16251d; }
+.onLight .ring { border-color: #a36c42; }
+.onLavender { color: #4a3b63; }
+.onLavender .ring { border-color: #8a6bb0; }
+.onBlue { color: #16251d; }
+.onBlue .ring { border-color: #5b8aa6; }
