@@ -164,8 +164,9 @@
 
 @media (max-width: 700px) {
   .nav {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
   }
+  .actions { min-width: 0; flex-wrap: wrap; gap: .25rem; }
   .links {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -177,16 +178,19 @@
 }
 
 @media (max-width: 420px) {
+  .nav { grid-template-rows: auto auto auto; gap: .65rem; }
   .nav {
     padding-inline: .75rem;
   }
   .brand {
-    width: 7.5rem;
+    width: 6.5rem;
   }
+  .actions { max-width: 100%; gap: .1rem; }
+  .iconButton { width: 2.2rem; height: 2.2rem; }
   .links {
     justify-content: flex-start;
   }
-  .searchWrap { position: absolute; top: 4.1rem; right: .75rem; left: .75rem; z-index: 2; }
-  .searchForm { width: auto; background: #FBF6EC; }
-  .suggestions { right: 0; left: 0; width: auto; }
+  .searchWrap { position: static; grid-column: 1 / -1; grid-row: 3; width: 100%; }
+  .searchForm { width: 100%; box-sizing: border-box; background: #FBF6EC; }
+  .suggestions { right: 0; left: 0; width: 100%; }
 }

@@ -1,0 +1,7 @@
+html, body { max-width: 100%; overflow-x: clip; }
+
+main { min-width: 0; }
+
+img, svg, video, canvas { max-width: 100%; }
+
+button, input, select, textarea { max-width: 100%; }

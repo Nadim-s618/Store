@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Navbar from '../components/Navbar'
+import './mobile-safety.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nemo.store'),

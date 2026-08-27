@@ -215,3 +215,12 @@
 @media (prefers-reduced-motion: reduce) {
   .cartMessage { animation: none; }
 }
+
+@media (max-width: 640px) {
+  .reviews { margin-top: 3rem; padding-top: 2rem; }
+  .reviewsHeader, .reviewTop { align-items: flex-start; flex-direction: column; }
+  .ratingSummary { justify-items: start; }
+  .reviewTop { gap: .5rem; }
+  .reviewForm { padding: 1rem; }
+  .reviewSubmit { width: 100%; }
+}
