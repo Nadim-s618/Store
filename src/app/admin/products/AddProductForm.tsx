@@ -3,6 +3,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import { getMeasurementFields, MeasurementKey } from '@/lib/measurement-fields'
 import styles from '../admin.module.css'
 
 const sizeOptions = ['S', 'M', 'L', 'XL', 'XXL'] as const
@@ -16,7 +17,7 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
   const [form, setForm] = useState(initialForm)
   const [selectedColors, setSelectedColors] = useState(['Black'])
   const [stockByColor, setStockByColor] = useState<Record<string, Record<string, string>>>({ Black: emptySizeStock() })
-  const [measurements, setMeasurements] = useState<Record<string, { height: string; width: string; waist: string; hip: string }>>({})
+  const [measurements, setMeasurements] = useState<Record<string, Record<MeasurementKey, string>>>({})
   const [imagesByColor, setImagesByColor] = useState<Record<string, Record<string, File | undefined>>>({})
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -28,6 +29,10 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
 
   function updateColorSize(color: string, size: typeof sizeOptions[number], value: string) {
     setStockByColor((current) => ({ ...current, [color]: { ...current[color], [size]: value } }))
+  }
+
+  function updateMeasurement(size: string, key: MeasurementKey, value: string) {
+    setMeasurements((current) => ({ ...current, [size]: { height: current[size]?.height ?? '', width: current[size]?.width ?? '', waist: current[size]?.waist ?? '', hip: current[size]?.hip ?? '', [key]: value } }))
   }
 
   function toggleColor(color: string) {
@@ -73,9 +78,11 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
     router.refresh()
   }
 
+  const measurementFields = getMeasurementFields(form.category)
+
   return (
-    <section className={styles.panel}>
-      <h2>Add product</h2>
+    <details className={`${styles.panel} ${styles.collapsiblePanel}`} open>
+      <summary className={styles.collapsibleSummary}><h2>Add product</h2><span>Collapse</span></summary>
       <form className={styles.createForm} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
           <label>Product name<input value={form.name} onChange={(event) => updateField('name', event.target.value)} required /></label>
@@ -85,7 +92,7 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
         </div>
         <div className={styles.sectionChoices}>
           <p className={styles.choiceLabel}>Size chart measurements (cm)</p>
-          <div className={styles.measurementGrid}><span>Size</span><span>Height</span><span>Width</span><span>Waist</span><span>Hip</span>{sizeOptions.map((size) => <label key={size}><strong>{size}</strong><input type="number" min="0" step="0.1" placeholder="—" value={measurements[size]?.height ?? ''} onChange={(event) => setMeasurements((current) => ({ ...current, [size]: { height: event.target.value, width: current[size]?.width ?? '', waist: current[size]?.waist ?? '', hip: current[size]?.hip ?? '' } }))} /><input type="number" min="0" step="0.1" placeholder="—" value={measurements[size]?.width ?? ''} onChange={(event) => setMeasurements((current) => ({ ...current, [size]: { height: current[size]?.height ?? '', width: event.target.value, waist: current[size]?.waist ?? '', hip: current[size]?.hip ?? '' } }))} /><input type="number" min="0" step="0.1" placeholder="—" value={measurements[size]?.waist ?? ''} onChange={(event) => setMeasurements((current) => ({ ...current, [size]: { height: current[size]?.height ?? '', width: current[size]?.width ?? '', waist: event.target.value, hip: current[size]?.hip ?? '' } }))} /><input type="number" min="0" step="0.1" placeholder="—" value={measurements[size]?.hip ?? ''} onChange={(event) => setMeasurements((current) => ({ ...current, [size]: { height: current[size]?.height ?? '', width: current[size]?.width ?? '', waist: current[size]?.waist ?? '', hip: event.target.value } }))} /></label>)}</div>
+          <div className={styles.measurementGrid} style={{ gridTemplateColumns: `3rem repeat(${measurementFields.length}, minmax(0, 1fr))` }}><span>Size</span>{measurementFields.map((field) => <span key={field.key}>{field.label}</span>)}{sizeOptions.map((size) => <label key={size}><strong>{size}</strong>{measurementFields.map((field) => <input key={field.key} type="number" min="0" step="0.1" placeholder="—" value={measurements[size]?.[field.key] ?? ''} onChange={(event) => updateMeasurement(size, field.key, event.target.value)} />)}</label>)}</div>
         </div>
         <div className={styles.sectionChoices}>
           <p className={styles.choiceLabel}>Available colors</p>
@@ -102,6 +109,6 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
         {(error || message) && <p className={error ? styles.formError : styles.curationMessage} role="alert">{error || message}</p>}
         <button type="submit" className={styles.saveButton} disabled={isSaving}>{isSaving ? 'Adding…' : 'Add product'}</button>
       </form>
-    </section>
+    </details>
   )
 }

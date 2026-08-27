@@ -44,6 +44,7 @@ export default function CheckoutPage() {
       setOrderNumber(result.orderNumber)
       setTrackingCode(result.trackingCode || '')
       window.localStorage.removeItem(storageKey)
+      window.dispatchEvent(new CustomEvent('cart-updated'))
       setSubmitted(true)
     } catch (error) {
       setOrderError(error instanceof Error ? error.message : 'Unable to place the order right now.')
@@ -52,7 +53,7 @@ export default function CheckoutPage() {
     }
   }
 
-  async function downloadReceipt() {
+  async function downloadInvoice() {
     setIsDownloading(true)
     try {
       const response = await fetch('/api/receipt', {
@@ -60,12 +61,12 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderNumber, trackingCode, deliveryDetails, items, subtotal, shipping, total }),
       })
-      if (!response.ok) throw new Error('Receipt download failed')
-      const receiptBlob = await response.blob()
-      const url = URL.createObjectURL(receiptBlob)
+      if (!response.ok) throw new Error('Invoice download failed')
+      const invoiceBlob = await response.blob()
+      const url = URL.createObjectURL(invoiceBlob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${orderNumber || 'nemo-order'}-receipt.pdf`
+      link.download = `${orderNumber || 'nemo-order'}-invoice.pdf`
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -96,7 +97,7 @@ export default function CheckoutPage() {
             <div><span>Estimated delivery</span><strong>3–5 business days</strong></div>
             <div><span>Tracking code</span><strong>{trackingCode}</strong></div>
           </div>
-          <button type="button" className={styles.receiptButton} onClick={downloadReceipt} disabled={isDownloading}>{isDownloading ? 'Preparing receipt…' : 'Download receipt'} <span aria-hidden="true">↓</span></button>
+          <button type="button" className={styles.receiptButton} onClick={downloadInvoice} disabled={isDownloading}>{isDownloading ? 'Preparing invoice…' : 'Download invoice'} <span aria-hidden="true">↓</span></button>
           <Link href="/shop" className={styles.primaryButton}>Continue shopping <span aria-hidden="true">↗</span></Link>
         </section>
       ) : items.length === 0 ? (

@@ -4,6 +4,7 @@ import AdminShopLink from './AdminShopLink'
 import BrandLink from './BrandLink'
 import SignOutButton from './SignOutButton'
 import SearchButton from './SearchButton'
+import CartButton from './CartButton'
 import styles from './Navbar.module.css'
 
 function ProfileIcon() {
@@ -15,17 +16,12 @@ function ProfileIcon() {
   )
 }
 
-function CartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}>
-      <path d="M7 8.5V7a5 5 0 0 1 10 0v1.5" />
-      <path d="M5.5 8.5h13l-1 11.5a1.5 1.5 0 0 1-1.5 1.5H8a1.5 1.5 0 0 1-1.5-1.5z" />
-    </svg>
-  )
-}
-
 function TrackingIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}><path d="M3.5 6.5h11v10h-11z" /><path d="M14.5 10h3l3 3v3.5h-6z" /><circle cx="7.5" cy="18" r="1.5" /><circle cx="17.5" cy="18" r="1.5" /></svg>
+}
+
+function HeartIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}><path d="M20.8 8.9c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.4 4.4 0 0 1 12 6.2a4.4 4.4 0 0 1 8.8 2.7Z" /></svg>
 }
 
 function SignOutIcon() {
@@ -62,9 +58,8 @@ export default async function Navbar() {
           <Link href="/tracking" className={styles.iconButton} aria-label="Track order">
             <TrackingIcon />
           </Link>
-          <Link href="/cart" className={styles.iconButton} aria-label="Cart">
-            <CartIcon />
-          </Link>
+          {user && <Link href="/wishlist" className={styles.iconButton} aria-label="Favorites"><HeartIcon /></Link>}
+          <CartButton />
           {user && <SignOutButton className={styles.iconButton} ariaLabel="Sign out"><SignOutIcon /></SignOutButton>}
         </div>
       </nav>

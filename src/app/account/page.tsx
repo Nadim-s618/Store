@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/browser'
@@ -172,6 +173,8 @@ export default function AccountPage() {
           {(error || message) && <p className={error ? styles.error : styles.message} role="alert">{error || message}</p>}
           <div className={styles.actions}>
             <SignOutButton className={styles.signOut} />
+            <Link href="/orders" className={styles.cancel}>Order history</Link>
+            <Link href="/wishlist" className={styles.cancel}>Favorites</Link>
             <button type="button" className={styles.cancel} onClick={() => router.push('/')}>Back to shop</button>
             <button type="submit" className={styles.submit} disabled={isSaving || isUploading}>{isSaving ? 'Saving…' : 'Save changes'} <span>↗</span></button>
           </div>

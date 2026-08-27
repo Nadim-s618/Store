@@ -112,11 +112,14 @@ function ProductGrid({ products }: { products: Awaited<ReturnType<typeof getHome
       {products.map((product) => (
         <div key={product.id} className={styles.gridItem}>
           <ProductCard
+            productId={product.id}
+            variants={product.sizeStocks}
             slug={product.slug}
             name={product.name}
             price={Number(product.price)}
             imageUrl={product.imageUrl ?? undefined}
             stock={product.stock}
+            showAvailability
           />
         </div>
       ))}

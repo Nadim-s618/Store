@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import ProductCard from '@/components/ProductCard'
+import ShopProductGrid from './ShopProductGrid'
 import { getProducts, getShopCategories } from '@/services/product.service'
 import styles from './shop.module.css'
 
@@ -36,6 +36,9 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     const price = Number(product.price)
     return matchesSearch && hasCategory && hasColor && hasSize && price >= minPrice && price <= maxPrice
   }).sort((first, second) => sortByRecent ? second.createdAt.getTime() - first.createdAt.getTime() : 0)
+  const pageSize = 12
+  const initialProducts = visibleProducts.slice(0, pageSize).map((product) => ({ id: product.id, slug: product.slug, name: product.name, price: Number(product.price), imageUrl: product.imageUrl, stock: product.stock, sizeStocks: product.sizeStocks.map((stock) => ({ color: stock.color, size: stock.size, quantity: stock.quantity })) }))
+  const productQuery = new URLSearchParams(Object.entries({ search: searchQuery, category: selectedCategory, sort: sortByRecent ? 'new' : '', color: selectedColor, size: selectedSize, minPrice: selectedMinPrice, maxPrice: selectedMaxPrice }).filter(([, value]) => value)).toString()
 
   const renderCategoryCard = (category: typeof categories[number], className: string) => <Link key={category.slug} href={`/shop/category/${category.slug}`} className={`${styles.categoryCard} ${className}`} style={{ backgroundImage: `linear-gradient(180deg, rgba(10, 14, 12, .05), rgba(10, 14, 12, .8)), url("${category.imageUrl}")` }}>
     <div className={styles.cardCopy}>
@@ -54,8 +57,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <p>{sortByRecent ? 'The latest considered pieces, listed from newest to earliest.' : 'Considered pieces for a wardrobe that keeps its place.'}</p>
       </header>
 
-      {!sortByRecent && <details className={styles.filterPanel}>
-        <summary><span className={styles.filterIcon} aria-hidden="true">☷</span> Filter</summary>
+      {!sortByRecent && <details className={styles.filterPanel} open={hasFilters}>
+        <summary><span className={styles.filterIcon} aria-hidden="true">+</span> Filter</summary>
         <form className={styles.filterBar} method="get" action="/shop">
           <input type="hidden" name="search" value={searchQuery} />
           <label>Category<select name="category" defaultValue={selectedCategory}><option value="">All categories</option>{categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}</select></label>
@@ -95,7 +98,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           <h3>No products available.</h3>
           <p>We couldn’t find a match here. Please try something different.</p>
           {hasFilters && <Link href="/shop" className={styles.clearFilter}>Clear filters</Link>}
-        </div> : <div className={styles.productGrid}>{visibleProducts.map((product) => <ProductCard key={product.id} slug={product.slug} name={product.name} price={Number(product.price)} imageUrl={product.imageUrl ?? undefined} stock={product.stock} />)}</div>}
+        </div> : <ShopProductGrid initialProducts={initialProducts} initialHasMore={visibleProducts.length > pageSize} query={productQuery} />}
       </section>
     </main>
   )

@@ -97,17 +97,36 @@ export async function POST(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  try { await requireAdmin() } catch { return Response.json({ error: 'Admin access is required.' }, { status: 403 }) }
+  let admin: Awaited<ReturnType<typeof requireAdmin>>
+  try { admin = await requireAdmin() } catch { return Response.json({ error: 'Admin access is required.' }, { status: 403 }) }
   const body = await request.json().catch(() => null) as Record<string, unknown> | null
   const productId = typeof body?.id === 'string' ? body.id : ''
   const name = typeof body?.name === 'string' ? body.name.trim() : ''
   const categoryName = typeof body?.categoryName === 'string' ? body.categoryName.trim() : ''
   const price = Number(body?.price)
   const stock = Number(body?.stock)
+  const variants = Array.isArray(body?.variants) ? body.variants as Array<{ color?: unknown; size?: unknown; quantity?: unknown }> : null
+  const sizes = ['S', 'M', 'L', 'XL', 'XXL'] as const
+  const colorOptions = ['Black', 'White', 'Navy', 'Beige', 'Grey', 'Green', 'Brown', 'Red']
   if (!productId || !name || !categoryName) return Response.json({ error: 'Name and category are required.' }, { status: 400 })
   if (!Number.isFinite(price) || price < 0 || !Number.isInteger(stock) || stock < 0) return Response.json({ error: 'Enter valid price and stock values.' }, { status: 400 })
+  if (variants && variants.some((variant) => !colorOptions.includes(String(variant.color)) || !sizes.includes(String(variant.size) as typeof sizes[number]) || !Number.isInteger(Number(variant.quantity)) || Number(variant.quantity) < 0)) return Response.json({ error: 'Enter valid color and size stock quantities.' }, { status: 400 })
   try {
-    const updated = await prisma.product.update({ where: { id: productId }, data: { name, description: typeof body?.description === 'string' ? body.description.trim() || null : null, price, stock, category: { connectOrCreate: { where: { slug: slugify(categoryName) }, create: { name: categoryName, slug: slugify(categoryName) } } } } })
+    const updated = await prisma.$transaction(async (transaction) => {
+      const current = variants ? await transaction.product.findUnique({ where: { id: productId }, include: { sizeStocks: true } }) : null
+      if (variants && !current) throw new Error('PRODUCT_NOT_FOUND')
+      if (variants) {
+        for (const variant of variants) {
+          const color = String(variant.color)
+          const size = String(variant.size) as typeof sizes[number]
+          const quantity = Number(variant.quantity)
+          const before = current!.sizeStocks.find((stockItem) => stockItem.color === color && stockItem.size === size)?.quantity ?? 0
+          await transaction.productSizeStock.upsert({ where: { productId_color_size: { productId, color, size } }, update: { quantity }, create: { productId, color, size, quantity } })
+          if (quantity !== before) await transaction.inventoryAdjustment.create({ data: { productId, color, size, quantityChange: quantity - before, quantityAfter: quantity, reason: 'Admin stock edit', actorEmail: admin?.email ?? null } })
+        }
+      }
+      return transaction.product.update({ where: { id: productId }, data: { name, description: typeof body?.description === 'string' ? body.description.trim() || null : null, price, stock: variants ? variants.reduce((sum, variant) => sum + Number(variant.quantity), 0) : stock, category: { connectOrCreate: { where: { slug: slugify(categoryName) }, create: { name: categoryName, slug: slugify(categoryName) } } } } })
+    })
     return Response.json({ id: updated.id })
   } catch (error) {
     const isDuplicate = error instanceof Error && error.message.includes('Unique constraint')

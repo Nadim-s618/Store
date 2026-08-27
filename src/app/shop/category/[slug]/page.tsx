@@ -29,7 +29,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <div className={styles.productHeader}>
         <div><p className={styles.kicker}>The edit</p><h2>{categoryProducts.length} {categoryProducts.length === 1 ? 'piece' : 'pieces'}.</h2></div>
       </div>
-      {categoryProducts.length === 0 ? <p className={styles.empty}>No products have been added to this category yet.</p> : <div className={styles.productGrid}>{categoryProducts.map((product) => <ProductCard key={product.id} slug={product.slug} name={product.name} price={Number(product.price)} imageUrl={product.imageUrl ?? undefined} stock={product.stock} />)}</div>}
+      {categoryProducts.length === 0 ? <p className={styles.empty}>No products have been added to this category yet.</p> : <div className={styles.productGrid}>{categoryProducts.map((product) => <ProductCard key={product.id} productId={product.id} variants={product.sizeStocks} slug={product.slug} name={product.name} price={Number(product.price)} imageUrl={product.imageUrl ?? undefined} stock={product.stock} />)}</div>}
     </section>
   </main>
 }

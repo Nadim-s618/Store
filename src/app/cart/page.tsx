@@ -26,6 +26,7 @@ export default function CartPage() {
     const next = quantity > 0 ? items.map((item) => item.id === id ? { ...item, quantity } : item) : items.filter((item) => item.id !== id)
     setItems(next)
     window.localStorage.setItem(storageKey, JSON.stringify(next))
+    window.dispatchEvent(new CustomEvent('cart-updated'))
   }
 
   function startEditing(item: CartItem) {

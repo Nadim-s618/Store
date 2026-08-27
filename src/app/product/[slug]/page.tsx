@@ -1,8 +1,26 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { getProductBySlug } from '@/services/product.service'
+import { getMeasurementFields } from '@/lib/measurement-fields'
+import { getProductBySlug, getRelatedProducts } from '@/services/product.service'
 import ProductOptions from './ProductOptions'
+import WishlistButton from '@/components/WishlistButton'
 import styles from './product.module.css'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const product = await getProductBySlug(slug)
+  if (!product) return { title: 'Product not found' }
+  const description = product.description?.trim() || `Shop ${product.name} from NEMO's considered clothing collection.`
+  const image = product.imageUrl || product.images[0]?.url
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/product/${product.slug}` },
+    openGraph: { type: 'website', title: product.name, description, url: `/product/${product.slug}`, images: image ? [{ url: image, alt: product.name }] : undefined },
+    twitter: { card: 'summary_large_image', title: product.name, description, images: image ? [image] : undefined },
+  }
+}
 
 export default async function ProductPage({
   params,
@@ -16,6 +34,9 @@ export default async function ProductPage({
     notFound()
   }
 
+  const measurementFields = getMeasurementFields(product.category.name)
+  const relatedProducts = await getRelatedProducts(product.id, product.categoryId)
+
   return (
     <main className={styles.page}>
       <aside className={styles.productInfo}>
@@ -27,6 +48,7 @@ export default async function ProductPage({
         <p className={styles.description}>
           {product.description ?? 'No description available.'}
         </p>
+        <WishlistButton productId={product.id} label />
       </aside>
       <section className={styles.productMain}>
         <ProductOptions
@@ -36,16 +58,18 @@ export default async function ProductPage({
           variants={product.sizeStocks.map((variant) => ({ color: variant.color, size: variant.size, quantity: variant.quantity }))}
           images={product.images.map((image) => ({ color: image.color, view: image.view, url: image.url }))}
           fallbackImage={product.imageUrl ?? undefined}
+          reviews={product.reviews.map((review) => ({ id: review.id, rating: review.rating, comment: review.comment, author: review.user.name || 'Customer', verifiedPurchase: review.verifiedPurchase, createdAt: review.createdAt.toISOString() }))}
+          relatedProducts={relatedProducts.map((related) => ({ id: related.id, slug: related.slug, name: related.name, price: Number(related.price), imageUrl: related.imageUrl, stock: related.stock, sizeStocks: related.sizeStocks }))}
         />
       </section>
       <aside className={styles.sizeChart}>
         <p className={styles.chartKicker}>Find your fit</p>
         <h2>Size chart.</h2>
         <table>
-          <thead><tr><th>Size</th><th>Height</th><th>Width</th><th>Waist</th><th>Hip</th></tr></thead>
+          <thead><tr><th>Size</th>{measurementFields.map((field) => <th key={field.key}>{field.label}</th>)}</tr></thead>
           <tbody>{(['S', 'M', 'L', 'XL', 'XXL'] as const).map((size) => {
             const measurement = product.sizeMeasurements.find((item) => item.size === size)
-            return <tr key={size}><td>{size}</td><td>{measurement?.height != null ? `${measurement.height} cm` : '—'}</td><td>{measurement?.width != null ? `${measurement.width} cm` : '—'}</td><td>{measurement?.waist != null ? `${measurement.waist} cm` : '—'}</td><td>{measurement?.hip != null ? `${measurement.hip} cm` : '—'}</td></tr>
+            return <tr key={size}><td>{size}</td>{measurementFields.map((field) => { const value = measurement?.[field.key]; return <td key={field.key}>{value != null ? `${value} cm` : '—'}</td> })}</tr>
           })}</tbody>
         </table>
         <p className={styles.chartNote}>Choose your size below the product image.</p>

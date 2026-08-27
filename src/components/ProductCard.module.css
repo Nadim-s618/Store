@@ -1,16 +1,19 @@
+.card { color: inherit; }
 .link {
   display: block;
   text-decoration: none;
   color: inherit;
 }
 
-.imageBox {
+.imageBox { position: relative;
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #ece7dc;
   margin-bottom: 1.1rem;
 }
+.favorite { position: relative; margin-top: -4.1rem; margin-right: .75rem; margin-bottom: 2.8rem; display: flex; justify-content: flex-end; }
+.favorite button { background: rgba(251,246,236,.9); }
 
 .image {
   width: 100%;
@@ -77,7 +80,9 @@
   letter-spacing: .01em;
 }
 
-.details { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.productInfo { min-width: 0; text-decoration: none; }
+.infoRow { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.availabilityColumn { position: relative; display: grid; justify-items: end; gap: .45rem; }
 
 .availability {
   margin: .1rem 0 0;
@@ -88,9 +93,17 @@
 }
 
 .outOfStock { color: #a54d3e; }
+.cartLink { position: relative; display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid rgba(22, 37, 29, .2); border-radius: 50%; background: transparent; color: #16251d; cursor: pointer; transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease; }
+.cartLink svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
+.cartLink:hover { border-color: #a16f43; background: #a16f43; color: #fff; transform: translateY(-2px); }
+.cartLink:disabled { cursor: not-allowed; opacity: .4; }
+.addedLabel { position: absolute; font-size: .65rem; }
+.addedMessage { position: absolute; top: calc(100% + .35rem); right: 0; color: #477052; font-size: .62rem; opacity: 0; pointer-events: none; white-space: nowrap; }
+.addedMessageVisible { animation: addedMessage .25s ease forwards; }
+@keyframes addedMessage { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .image, .imageBox::after, .name {
+  .image, .imageBox::after, .name, .cartLink, .addedMessage {
     transition: none;
   }
 }

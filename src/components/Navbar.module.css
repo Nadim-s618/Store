@@ -129,6 +129,9 @@
   transform: translateY(0) scale(.94);
 }
 
+.cartButton { position: relative; }
+.cartBadge { position: absolute; top: -.1rem; right: -.15rem; display: grid; min-width: 1rem; height: 1rem; padding: 0 .15rem; place-items: center; border: 2px solid #FBF6EC; border-radius: 999px; background: #B8874B; color: #fff; font-size: .55rem; font-weight: 600; line-height: 1; }
+
 .icon {
   width: 1.25rem;
   height: 1.25rem;

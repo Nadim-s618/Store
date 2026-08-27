@@ -28,7 +28,7 @@ export default async function AdminOrdersPage() {
           postcode: order.postcode,
           country: order.country,
           paymentMethod: order.paymentMethod,
-          items: order.items.map((item) => ({ name: item.product.name, quantity: item.quantity, price: Number(item.price) })),
+          items: order.items.map((item) => ({ name: item.product.name, quantity: item.quantity, price: Number(item.price), color: item.color, size: item.size })),
         }))} />}
       </section>
     </>

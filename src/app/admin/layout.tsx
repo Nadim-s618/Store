@@ -20,6 +20,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/products">Products</Link>
           <Link href="/admin/categories">Categories</Link>
           <Link href="/admin/orders">Orders</Link>
+          <Link href="/admin/shop-analysis">Shop analysis</Link>
+          <Link href="/admin/admins">Admins</Link>
         </nav>
         <Link href="/" className={styles.backLink}>← Go to shop</Link>
       </aside>

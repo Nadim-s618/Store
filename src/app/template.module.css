@@ -1,0 +1,3 @@
+.pageTransition { min-height: 100%; animation: storyReveal .8s cubic-bezier(.2, .8, .2, 1) both; will-change: opacity, transform; }
+@keyframes storyReveal { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .pageTransition { animation: none; } }

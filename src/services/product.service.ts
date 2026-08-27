@@ -65,22 +65,27 @@ export async function getProducts({
 export async function getProductBySlug(slug: string) {
   const product = await prisma.product.findUnique({
     where: { slug },
-    include: { category: true, sizeStocks: true, sizeMeasurements: true, images: { orderBy: { sortOrder: 'asc' } } },
+    include: { category: true, sizeStocks: true, sizeMeasurements: true, images: { orderBy: { sortOrder: 'asc' } }, reviews: { orderBy: { createdAt: 'desc' }, include: { user: { select: { name: true } } } } },
   })
   return product ? withImageFallback(product) : null
+}
+
+export async function getRelatedProducts(productId: string, categoryId: string) {
+  const products = await prisma.product.findMany({ where: { categoryId, id: { not: productId } }, include: { sizeStocks: true, images: { orderBy: { sortOrder: 'asc' }, take: 1 } }, orderBy: { createdAt: 'desc' }, take: 4 })
+  return Promise.all(products.map(withImageFallback))
 }
 
 export async function getHomepageCollections() {
   const [topCollection, newArrivals] = await Promise.all([
     prisma.product.findMany({
       where: { isTopCollection: true },
-      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 }, sizeStocks: true },
       orderBy: [{ topCollectionOrder: 'asc' }, { createdAt: 'desc' }],
       take: 4,
     }),
     prisma.product.findMany({
       where: { isNewArrival: true },
-      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 }, sizeStocks: true },
       orderBy: [{ newArrivalOrder: 'asc' }, { createdAt: 'desc' }],
       take: 4,
     }),

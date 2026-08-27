@@ -1,0 +1,14 @@
+import type { Metadata } from 'next'
+import styles from '../legal.module.css'
+
+export const metadata: Metadata = { title: 'Privacy policy', description: 'How NEMO collects, uses, and protects your information.' }
+
+export default function PrivacyPage() {
+  return <main className={styles.page}><header className={styles.hero}><p className={styles.kicker}>NEMO / Privacy</p><h1>Your privacy, considered.</h1><p className={styles.lead}>We collect only the information we need to operate the store, complete your orders, and give you a better experience.</p></header><div className={styles.content}>
+    <section className={styles.section}><p className={styles.index}>01</p><div><h2>Information we collect</h2><p>When you create an account or place an order, we may collect your name, email address, phone number, delivery address, order details, and account preferences. We also receive information you choose to provide, such as a profile photo, review, or favorite product.</p><p>Basic technical information, such as browser details and pages visited, may be collected to keep the site secure and improve performance.</p></div></section>
+    <section className={styles.section}><p className={styles.index}>02</p><div><h2>How we use it</h2><ul><li>Process, fulfill, and deliver your orders.</li><li>Send order confirmations, delivery updates, and important account messages.</li><li>Maintain your account, wishlist, reviews, and order history.</li><li>Improve our products, services, and website security.</li></ul></div></section>
+    <section className={styles.section}><p className={styles.index}>03</p><div><h2>Sharing and security</h2><p>We do not sell your personal information. We share information only with service providers that help us run the store, such as hosting, database, authentication, payment, delivery, and email providers. These providers may process information only as needed to provide their services.</p><p>We use reasonable administrative and technical safeguards, but no internet transmission or storage system can be guaranteed completely secure.</p></div></section>
+    <section className={styles.section}><p className={styles.index}>04</p><div><h2>Your choices</h2><p>You can review or update your account information from the Account page. You may request access to, correction of, or deletion of your personal information, subject to records we need to keep for legal, security, or order-support purposes. You can also unsubscribe from optional marketing messages at any time.</p></div></section>
+    <section className={styles.section}><p className={styles.index}>05</p><div><h2>Contact us</h2><p>Questions about this policy or your information? Email <a className={styles.contact} href="mailto:hello@nemo.com">hello@nemo.com</a>.</p><p>Last updated: August 27, 2026.</p></div></section>
+  </div></main>
+}
