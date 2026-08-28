@@ -57,13 +57,17 @@ export default function CheckoutPage() {
 
   async function downloadInvoice() {
     setIsDownloading(true)
+    setOrderError('')
     try {
       const response = await fetch('/api/receipt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId, trackingCode }),
       })
-      if (!response.ok) throw new Error('Invoice download failed')
+      if (!response.ok) {
+        const result = await response.json().catch(() => null) as { error?: string } | null
+        throw new Error(result?.error || 'Invoice download failed.')
+      }
       const invoiceBlob = await response.blob()
       const url = URL.createObjectURL(invoiceBlob)
       const link = document.createElement('a')
@@ -73,6 +77,8 @@ export default function CheckoutPage() {
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
+    } catch (error) {
+      setOrderError(error instanceof Error ? error.message : 'Invoice download failed.')
     } finally {
       setIsDownloading(false)
     }
@@ -100,6 +106,7 @@ export default function CheckoutPage() {
             <div><span>Tracking code</span><strong>{trackingCode}</strong></div>
           </div>
           <button type="button" className={styles.receiptButton} onClick={downloadInvoice} disabled={isDownloading}>{isDownloading ? 'Preparing invoice…' : 'Download invoice'} <span aria-hidden="true">↓</span></button>
+          {orderError && <p className={styles.error} role="alert">{orderError}</p>}
           <Link href="/shop" className={styles.primaryButton}>Continue shopping <span aria-hidden="true">↗</span></Link>
         </section>
       ) : items.length === 0 ? (

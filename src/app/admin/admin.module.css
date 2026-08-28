@@ -140,6 +140,9 @@
 .sizeStockGrid label { display: grid; gap: .4rem; color: #6d726c; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
 .sizeStockGrid input { width: 100%; box-sizing: border-box; padding: .7rem; border: 1px solid rgba(22, 37, 29, .2); border-radius: 8px; color: #16251d; background: rgba(255, 255, 255, .45); font: inherit; }
 .colorChoices { display: flex; flex-wrap: wrap; gap: .5rem; }
+.addColorControl { display: flex; align-items: center; gap: .6rem; margin-top: .75rem; }
+.addColorControl input { width: min(16rem, 100%); padding: .55rem .7rem; border: 1px solid rgba(22, 37, 29, .2); border-radius: 8px; color: #16251d; background: rgba(255, 255, 255, .45); font: inherit; font-size: .78rem; }
+.addColorControl input:focus { border-color: #a16f43; outline: 0; }
 .colorStock { margin-top: 1.25rem; }
 .imagePicker { display: flex; align-items: center; gap: .7rem; margin-top: 1rem; color: #6d726c; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
 .imagePicker input { max-width: 220px; font-size: .75rem; text-transform: none; }

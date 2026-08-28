@@ -3,7 +3,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import { getMeasurementFields, MeasurementKey } from '@/lib/measurement-fields'
+import { getMeasurementDefaults, getMeasurementFields, MeasurementKey } from '@/lib/measurement-fields'
 import styles from '../admin.module.css'
 
 const sizeOptions = ['S', 'M', 'L', 'XL', 'XXL'] as const
@@ -16,6 +16,7 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
   const router = useRouter()
   const [form, setForm] = useState(initialForm)
   const [selectedColors, setSelectedColors] = useState(['Black'])
+  const [customColor, setCustomColor] = useState('')
   const [stockByColor, setStockByColor] = useState<Record<string, Record<string, string>>>({ Black: emptySizeStock() })
   const [measurements, setMeasurements] = useState<Record<string, Record<MeasurementKey, string>>>({})
   const [imagesByColor, setImagesByColor] = useState<Record<string, Record<string, File | undefined>>>({})
@@ -25,6 +26,11 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
 
   function updateField(field: keyof typeof initialForm, value: string | boolean) {
     setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  function updateCategory(category: string) {
+    updateField('category', category)
+    setMeasurements(getMeasurementDefaults(category))
   }
 
   function updateColorSize(color: string, size: typeof sizeOptions[number], value: string) {
@@ -38,6 +44,19 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
   function toggleColor(color: string) {
     setSelectedColors((current) => current.includes(color) ? current.filter((item) => item !== color) : [...current, color])
     setStockByColor((current) => current[color] ? current : { ...current, [color]: emptySizeStock() })
+  }
+
+  function addCustomColor() {
+    const color = customColor.trim().replace(/\s+/g, ' ')
+    if (!color) return
+    if (selectedColors.some((item) => item.toLowerCase() === color.toLowerCase())) {
+      setError('That color has already been selected.')
+      return
+    }
+    setSelectedColors((current) => [...current, color])
+    setStockByColor((current) => ({ ...current, [color]: emptySizeStock() }))
+    setCustomColor('')
+    setError('')
   }
 
   function updateImage(color: string, view: typeof viewOptions[number], event: ChangeEvent<HTMLInputElement>) {
@@ -58,24 +77,29 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
       if (file) requestData.append(`image-${color}-${view}`, file)
     }))
 
-    const response = await fetch('/api/admin/products', {
-      method: 'POST',
-      body: requestData,
-    })
-    const result = await response.json().catch(() => null) as { error?: string } | null
-    if (!response.ok) {
-      setError(result?.error || 'Unable to create product.')
+    try {
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        body: requestData,
+      })
+      const result = await response.json().catch(() => null) as { error?: string } | null
+      if (!response.ok) {
+        setError(result?.error || 'Unable to create product.')
+        return
+      }
+      setForm(initialForm)
+      setSelectedColors(['Black'])
+      setCustomColor('')
+      setStockByColor({ Black: emptySizeStock() })
+      setMeasurements({})
+      setImagesByColor({})
+      setMessage('Product added successfully.')
+      router.refresh()
+    } catch {
+      setError('The product could not be added. Please check your connection and try again.')
+    } finally {
       setIsSaving(false)
-      return
     }
-    setForm(initialForm)
-    setSelectedColors(['Black'])
-    setStockByColor({ Black: emptySizeStock() })
-    setMeasurements({})
-    setImagesByColor({})
-    setMessage('Product added successfully.')
-    setIsSaving(false)
-    router.refresh()
   }
 
   const measurementFields = getMeasurementFields(form.category)
@@ -86,7 +110,7 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
       <form className={styles.createForm} onSubmit={handleSubmit}>
         <div className={styles.formGrid}>
           <label>Product name<input value={form.name} onChange={(event) => updateField('name', event.target.value)} required /></label>
-          <label>Category<select value={form.category} onChange={(event) => updateField('category', event.target.value)} required><option value="" disabled>Select a category</option>{categories.map((category) => <option key={category.slug} value={category.name}>{category.name}</option>)}</select></label>
+          <label>Category<select value={form.category} onChange={(event) => updateCategory(event.target.value)} required><option value="" disabled>Select a category</option>{categories.map((category) => <option key={category.slug} value={category.slug}>{category.name}</option>)}</select></label>
           <label>Price<input type="number" min="0" step="0.01" value={form.price} onChange={(event) => updateField('price', event.target.value)} required /></label>
           <label className={styles.fullWidth}>Description<textarea value={form.description} onChange={(event) => updateField('description', event.target.value)} rows={3} /></label>
         </div>
@@ -96,7 +120,11 @@ export default function AddProductForm({ categories }: { categories: Array<{ nam
         </div>
         <div className={styles.sectionChoices}>
           <p className={styles.choiceLabel}>Available colors</p>
-          <div className={styles.colorChoices}>{colorOptions.map((color) => <label key={color} className={styles.choice}><input type="checkbox" checked={selectedColors.includes(color)} onChange={() => toggleColor(color)} /><span>{color}</span></label>)}</div>
+          <div className={styles.colorChoices}>{[...colorOptions, ...selectedColors.filter((color) => !colorOptions.includes(color))].map((color) => <label key={color} className={styles.choice}><input type="checkbox" checked={selectedColors.includes(color)} onChange={() => toggleColor(color)} /><span>{color}</span></label>)}</div>
+          <div className={styles.addColorControl}>
+            <input value={customColor} maxLength={32} placeholder="Add another color" aria-label="Custom color" onChange={(event) => setCustomColor(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); addCustomColor() } }} />
+            <button type="button" className={styles.editButton} onClick={addCustomColor}>Add color</button>
+          </div>
           {selectedColors.map((color) => <div key={color} className={styles.colorStock}><p className={styles.choiceLabel}>{color} stock by size</p><div className={styles.sizeStockGrid}>{sizeOptions.map((size) => <label key={size}>{size}<input type="number" min="0" step="1" value={stockByColor[color]?.[size] ?? '0'} onChange={(event) => updateColorSize(color, size, event.target.value)} required /></label>)}</div><div className={styles.imageViewGrid}>{viewOptions.map((view) => <label key={view} className={styles.imagePicker}>{view}<input type="file" accept="image/*" onChange={(event) => updateImage(color, view, event)} /><span>{imagesByColor[color]?.[view]?.name || 'No image selected'}</span></label>)}</div></div>)}
         </div>
         <div className={styles.sectionChoices}>
