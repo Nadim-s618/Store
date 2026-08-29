@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { cache } from 'react'
 
 type AuthUser = Awaited<ReturnType<typeof getCurrentUser>>
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   return user
-}
+})
 
 export function isAdminUser(user: AuthUser) {
   const configuredAdminEmails = (process.env.ADMIN_EMAILS ?? '')

@@ -1,16 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styles from './WishlistButton.module.css'
 
-export default function WishlistButton({ productId, label = false, onChange }: { productId: string; label?: boolean; onChange?: (saved: boolean) => void }) {
-  const [saved, setSaved] = useState(false)
+export default function WishlistButton({ productId, label = false, initialSaved = false, onChange }: { productId: string; label?: boolean; initialSaved?: boolean; onChange?: (saved: boolean) => void }) {
+  const [saved, setSaved] = useState(initialSaved)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
-
-  useEffect(() => {
-    fetch(`/api/wishlist?productId=${encodeURIComponent(productId)}`).then((response) => response.ok ? response.json() as Promise<{ productIds: string[] }> : null).then((result) => { if (result) setSaved(result.productIds.includes(productId)) }).catch(() => undefined)
-  }, [productId])
 
   async function toggle() {
     setBusy(true); setMessage('')

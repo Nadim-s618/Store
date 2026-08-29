@@ -76,6 +76,9 @@ model Product {
   inventoryAdjustments InventoryAdjustment[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  @@index([isTopCollection, topCollectionOrder, createdAt])
+  @@index([isNewArrival, newArrivalOrder, createdAt])
 }
 
 model ProductSizeStock {

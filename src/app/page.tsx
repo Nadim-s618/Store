@@ -4,19 +4,23 @@ import { getHomepageCollections } from '@/services/product.service'
 import Footer from '@/components/Footer'
 import SignOutButton from '@/components/SignOutButton'
 import { getCurrentUser } from '@/lib/auth'
+import { getWishlistProductIds } from '@/lib/wishlist'
 import styles from './home.module.css'
 import StackScrollFX from './StackScrollFX'
 
 export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
-  const [{ topCollection, newArrivals }, user] = await Promise.all([
+  const userPromise = getCurrentUser()
+  const [collections, user, wishlistProductIds] = await Promise.all([
     getHomepageCollections().catch((error) => {
     console.error('Unable to load homepage products:', error)
     return { topCollection: [], newArrivals: [] }
     }),
-    getCurrentUser(),
+    userPromise,
+    userPromise.then((currentUser) => getWishlistProductIds(currentUser?.email)),
   ])
+  const { topCollection, newArrivals } = collections
 
   return (
     <>
@@ -53,7 +57,7 @@ export default async function HomePage() {
               <span className={styles.linkArrow}>↗</span>
             </Link>
           </div>
-          {topCollection.length === 0 ? <EmptyState /> : <ProductGrid products={topCollection} />}
+          {topCollection.length === 0 ? <EmptyState /> : <ProductGrid products={topCollection} wishlistProductIds={wishlistProductIds} />}
         </div>
       </section>
 
@@ -70,7 +74,7 @@ export default async function HomePage() {
               <span className={styles.linkArrow}>↗</span>
             </Link>
           </div>
-          {newArrivals.length === 0 ? <EmptyState /> : <ProductGrid products={newArrivals} />}
+          {newArrivals.length === 0 ? <EmptyState /> : <ProductGrid products={newArrivals} wishlistProductIds={wishlistProductIds} />}
         </div>
       </section>
 
@@ -106,7 +110,7 @@ export default async function HomePage() {
   )
 }
 
-function ProductGrid({ products }: { products: Awaited<ReturnType<typeof getHomepageCollections>>['topCollection'] }) {
+function ProductGrid({ products, wishlistProductIds }: { products: Awaited<ReturnType<typeof getHomepageCollections>>['topCollection']; wishlistProductIds: string[] }) {
   return (
     <div className={styles.grid}>
       {products.map((product) => (
@@ -119,6 +123,7 @@ function ProductGrid({ products }: { products: Awaited<ReturnType<typeof getHome
             price={Number(product.price)}
             imageUrl={product.imageUrl ?? undefined}
             stock={product.stock}
+            initialWishlistSaved={wishlistProductIds.includes(product.id)}
             showAvailability
           />
         </div>

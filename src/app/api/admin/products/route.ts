@@ -3,6 +3,7 @@ import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { randomUUID } from 'crypto'
+import { revalidateTag } from 'next/cache'
 
 export const runtime = 'nodejs'
 
@@ -126,6 +127,7 @@ export async function POST(request: Request) {
     }
     await prisma.productImage.createMany({ data: uploadedImages.map((image) => ({ productId: product.id, ...image })) })
     await prisma.product.update({ where: { id: product.id }, data: { imageUrl: uploadedImages[0]?.url ?? null } })
+    revalidateTag('homepage-products', 'max')
     return Response.json({ id: product.id }, { status: 201 })
   } catch (error) {
     if (createdProductId) await prisma.product.delete({ where: { id: createdProductId } }).catch(() => undefined)
@@ -166,6 +168,7 @@ export async function PATCH(request: Request) {
       }
       return transaction.product.update({ where: { id: productId }, data: { name, description: typeof body?.description === 'string' ? body.description.trim() || null : null, price, stock: variants ? variants.reduce((sum, variant) => sum + Number(variant.quantity), 0) : stock, category: { connectOrCreate: { where: { slug: slugify(categoryName) }, create: { name: categoryName, slug: slugify(categoryName) } } } } })
     })
+    revalidateTag('homepage-products', 'max')
     return Response.json({ id: updated.id })
   } catch (error) {
     const isDuplicate = error instanceof Error && error.message.includes('Unique constraint')
@@ -180,6 +183,7 @@ export async function DELETE(request: Request) {
   if (!productId) return Response.json({ error: 'Product ID is required.' }, { status: 400 })
   try {
     await prisma.product.delete({ where: { id: productId } })
+    revalidateTag('homepage-products', 'max')
     return Response.json({ deleted: true })
   } catch {
     return Response.json({ error: 'This product cannot be deleted because it is referenced by an order, cart, or review.' }, { status: 409 })

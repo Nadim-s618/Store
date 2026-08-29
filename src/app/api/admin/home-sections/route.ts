@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { revalidateTag } from 'next/cache'
 
 export async function PATCH(request: Request) {
   try {
@@ -28,6 +29,7 @@ export async function PATCH(request: Request) {
         newArrivalOrder,
       },
     })
+    revalidateTag('homepage-products', 'max')
     return Response.json({ id: product.id })
   } catch {
     return Response.json({ error: 'Product could not be updated.' }, { status: 404 })

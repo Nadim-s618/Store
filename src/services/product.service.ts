@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { unstable_cache } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -75,7 +76,7 @@ export async function getRelatedProducts(productId: string, categoryId: string) 
   return Promise.all(products.map(withImageFallback))
 }
 
-export async function getHomepageCollections() {
+async function fetchHomepageCollections() {
   const [topCollection, newArrivals] = await Promise.all([
     prisma.product.findMany({
       where: { isTopCollection: true },
@@ -96,3 +97,9 @@ export async function getHomepageCollections() {
     newArrivals: await Promise.all(newArrivals.map(withImageFallback)),
   }
 }
+
+export const getHomepageCollections = unstable_cache(
+  fetchHomepageCollections,
+  ['homepage-collections'],
+  { revalidate: 60, tags: ['homepage-products'] },
+)

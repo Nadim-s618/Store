@@ -16,10 +16,11 @@ type ProductCardProps = {
   showAvailability?: boolean
   productId: string
   variants?: ProductVariant[]
+  initialWishlistSaved?: boolean
   onWishlistChange?: (saved: boolean) => void
 }
 
-export default function ProductCard({ slug, name, price, imageUrl, stock, showAvailability = true, productId, variants = [], onWishlistChange }: ProductCardProps) {
+export default function ProductCard({ slug, name, price, imageUrl, stock, showAvailability = true, productId, variants = [], initialWishlistSaved = false, onWishlistChange }: ProductCardProps) {
   const [added, setAdded] = useState(false)
   const availableVariant = variants.find((variant) => variant.quantity > 0)
   const canAdd = Boolean(availableVariant || (variants.length === 0 && (stock ?? 0) > 0))
@@ -48,7 +49,7 @@ export default function ProductCard({ slug, name, price, imageUrl, stock, showAv
         )}
       </div>
     </Link>
-    <div className={styles.favorite}><WishlistButton productId={productId} onChange={onWishlistChange} /></div>
+    <div className={styles.favorite}><WishlistButton productId={productId} initialSaved={initialWishlistSaved} onChange={onWishlistChange} /></div>
     <div className={styles.infoRow}>
       <Link href={`/product/${slug}`} className={styles.productInfo}><h3 className={styles.name}>{name}</h3><p className={styles.price}>${price.toFixed(2)}</p></Link>
       {showAvailability && <div className={styles.availabilityColumn}>
